@@ -28,4 +28,10 @@ public class BeerServiceImpl implements BeerService {
 
 
     }
+
+    @Override
+    public Mono<BeerDTO> saveNewBeer(BeerDTO beerDTO) {
+        return beerRepository.save(beerMapper.beerDTOToBeer(beerDTO))
+                .map(beerMapper::beerToBeerDTO);
+    }
 }
