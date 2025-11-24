@@ -19,12 +19,16 @@ public class BeerController {
 
     private final BeerService beerService;
 
+    @PutMapping(BEER_PATH_ID)
+    Mono<ResponseEntity<Void>> updateExistingBeer(@PathVariable("beerId") Integer beerId, @RequestBody BeerDTO beerDTO) {
+        return beerService.updateExistingBeer(beerId, beerDTO)
+                .map(savedDto -> ResponseEntity.ok().build());
+    }
+
     @PostMapping(BEER_PATH)
     Mono<ResponseEntity<VoidType>> createNewBeer(@RequestBody BeerDTO beerDTO) {
         System.out.println("BeerController.createNewBeer beerDTO = " + beerDTO);
-        return beerService.saveNewBeer(beerDTO)
-                .map(savedDto -> ResponseEntity.created(UriComponentsBuilder
-                        .fromHttpUrl("http://localhost:8080" + BEER_PATH + "/" + savedDto.getId()).build().toUri()).build());
+        return beerService.saveNewBeer(beerDTO).map(savedDto -> ResponseEntity.created(UriComponentsBuilder.fromHttpUrl("http://localhost:8080" + BEER_PATH + "/" + savedDto.getId()).build().toUri()).build());
     }
 
     @GetMapping(BEER_PATH_ID)
