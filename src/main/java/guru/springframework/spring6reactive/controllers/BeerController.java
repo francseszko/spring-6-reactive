@@ -5,6 +5,7 @@ import guru.springframework.spring6reactive.model.BeerDTO;
 import guru.springframework.spring6reactive.services.BeerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
@@ -26,19 +27,20 @@ public class BeerController {
     }
 
     @PatchMapping(BEER_PATH_ID)
-    Mono<ResponseEntity<Void>> patchBeer(@PathVariable Integer beerId, @RequestBody BeerDTO beerDTO) {
+    Mono<ResponseEntity<Void>> patchBeer(@PathVariable Integer beerId, @Validated @RequestBody BeerDTO beerDTO) {
         return beerService.patchExistingBeer(beerId, beerDTO)
                 .map(savedDto -> ResponseEntity.ok().build());
     }
 
     @PutMapping(BEER_PATH_ID)
-    Mono<ResponseEntity<Void>> updateExistingBeer(@PathVariable("beerId") Integer beerId, @RequestBody BeerDTO beerDTO) {
+    Mono<ResponseEntity<Void>> updateExistingBeer(@PathVariable("beerId") Integer beerId,
+                                                  @Validated @RequestBody BeerDTO beerDTO) {
         return beerService.updateExistingBeer(beerId, beerDTO)
                 .map(savedDto -> ResponseEntity.ok().build());
     }
 
     @PostMapping(BEER_PATH)
-    Mono<ResponseEntity<VoidType>> createNewBeer(@RequestBody BeerDTO beerDTO) {
+    Mono<ResponseEntity<VoidType>> createNewBeer(@Validated @RequestBody BeerDTO beerDTO) {
         System.out.println("BeerController.createNewBeer beerDTO = " + beerDTO);
         return beerService.saveNewBeer(beerDTO).map(savedDto -> ResponseEntity.created(UriComponentsBuilder.fromHttpUrl("http://localhost:8080" + BEER_PATH + "/" + savedDto.getId()).build().toUri()).build());
     }
