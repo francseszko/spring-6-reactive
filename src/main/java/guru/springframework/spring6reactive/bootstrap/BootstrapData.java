@@ -1,7 +1,9 @@
 package guru.springframework.spring6reactive.bootstrap;
 
 import guru.springframework.spring6reactive.domain.Beer;
+import guru.springframework.spring6reactive.domain.Customer;
 import guru.springframework.spring6reactive.repositoriers.BeerRepository;
+import guru.springframework.spring6reactive.repositoriers.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -15,11 +17,35 @@ public class BootstrapData implements CommandLineRunner {
 
     private final BeerRepository beerRepository;
 
+    private final CustomerRepository customerRepository;
 
     @Override
     public void run(String... args) throws Exception {
         loadBeerData();
+        loadCustomerData();
         beerRepository.count().subscribe( count -> { System.out.println("Total Beer Records: " + count); });
+        customerRepository.count().subscribe(count -> { System.out.println("Total Customer Records: " + count); });
+    }
+
+    private void loadCustomerData() {
+        customerRepository.count().subscribe(count -> {
+            if (count == 0) {
+                customerRepository.save(Customer.builder()
+                        .customerName("Customer 1")
+                        .build())
+                        .subscribe();
+
+                customerRepository.save(Customer.builder()
+                                .customerName("Customer 2")
+                                .build())
+                        .subscribe();
+
+                customerRepository.save(Customer.builder()
+                                .customerName("Customer 3")
+                                .build())
+                        .subscribe();
+            }
+        });
     }
 
     private void loadBeerData() {
