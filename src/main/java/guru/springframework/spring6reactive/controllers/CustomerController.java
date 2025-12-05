@@ -16,8 +16,8 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class CustomerController {
 
-    private static final String CUSTOMER_PATH = "/api/v2/customer";
-    private static final String CUSTOMER_PATH_ID = CUSTOMER_PATH + "/{customerId}";
+    public static final String CUSTOMER_PATH = "/api/v2/customer";
+    public static final String CUSTOMER_PATH_ID = CUSTOMER_PATH + "/{customerId}";
 
     private final CustomerService customerService;
 
@@ -43,7 +43,7 @@ public class CustomerController {
     Mono<ResponseEntity<VoidType>> updateCustomer(@PathVariable("customerId") Integer customerId,
                                                   @Validated @RequestBody CustomerDTO customerDTO) {
         return customerService.updateCustomer(customerId, customerDTO)
-                .map(updatedDto -> ResponseEntity.ok().build());
+                .map(updatedDto -> ResponseEntity.noContent().build());
     }
 
     @PatchMapping(CUSTOMER_PATH_ID)
@@ -55,6 +55,6 @@ public class CustomerController {
 
     @DeleteMapping(CUSTOMER_PATH_ID)
     Mono<ResponseEntity<VoidType>> deleteCustomer(@PathVariable("customerId") Integer customerId) {
-        return customerService.deleteCustomer(customerId).map(deleteCustomer -> ResponseEntity.noContent().build());
+        return customerService.deleteCustomer(customerId).thenReturn(ResponseEntity.noContent().build());
     }
 }
