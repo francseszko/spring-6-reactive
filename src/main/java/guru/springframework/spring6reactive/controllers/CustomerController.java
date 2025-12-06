@@ -4,9 +4,11 @@ import com.sun.jdi.VoidType;
 import guru.springframework.spring6reactive.model.CustomerDTO;
 import guru.springframework.spring6reactive.services.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,7 +30,8 @@ public class CustomerController {
 
     @GetMapping(CUSTOMER_PATH_ID)
     Mono<CustomerDTO> getCustomerById(@PathVariable("customerId") Integer id) {
-        return customerService.getCustomerById(id);
+        return customerService.getCustomerById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     @PostMapping(CUSTOMER_PATH)
@@ -43,6 +46,7 @@ public class CustomerController {
     Mono<ResponseEntity<VoidType>> updateCustomer(@PathVariable("customerId") Integer customerId,
                                                   @Validated @RequestBody CustomerDTO customerDTO) {
         return customerService.updateCustomer(customerId, customerDTO)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .map(updatedDto -> ResponseEntity.noContent().build());
     }
 
@@ -55,6 +59,9 @@ public class CustomerController {
 
     @DeleteMapping(CUSTOMER_PATH_ID)
     Mono<ResponseEntity<VoidType>> deleteCustomer(@PathVariable("customerId") Integer customerId) {
-        return customerService.deleteCustomer(customerId).thenReturn(ResponseEntity.noContent().build());
+        return customerService.getCustomerById(customerId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                .map(foundDto -> customerService.deleteCustomer(foundDto.getId()))
+                .thenReturn(ResponseEntity.noContent().build());
     }
 }
